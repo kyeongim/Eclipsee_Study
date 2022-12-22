@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="read">
+
+<!-- 	<select id="setRoom" resultType="read">		
+		select SEAT_NUM,
+		to_number(SUBSTR(seat_num,2,2)) as "row",
+		 to_number(SUBSTR(seat_num,4,2)) as "col",
+			   STATUS
+		from READINGROOM
+		where SEAT_NUM like #{room} || '%'
+	</select>
+	
+	
+	<select id="getroomsize" resultType="map">
+		select to_number(max(SUBSTR(seat_num,2,2))) as "row", to_number(max(SUBSTR(seat_num,4,2))) as "col"
+		from readingroom
+		where seat_num like #{room} || '%'
+	</select>
+ -->
+
+	
+	<update id="saveSeat" parameterType="read">		<!-- 좌석 저장(관리자) -->
+
+		update READINGROOM
+		set STATUS = '1'
+		where seat_num like #{room} || '%'
+		<if test=" seat != null and seat.length > 0 ">
+			and SEAT_NUM in
+			<foreach collection="seat" item="item" open="(" close=")" separator=",">
+						#{item}
+			</foreach>
+		</if> 	
+	</update>
+	
+	<update id="releaseSeat" parameterType="read">		<!-- 좌석 해제(관리자) -->
+	
+		update READINGROOM
+		set STATUS = '0'
+		where seat_num like #{room} || '%'
+		 <if test=" seat != null and seat.length > 0 "> 
+		 and SEAT_NUM not in
+			<foreach collection="seat" item="item" open="(" close=")" separator=",">
+				#{item}
+			</foreach>
+		</if> 
+	</update>
+	
+	<select id="overlap" resultType="read"> 		<!-- 중복 좌석 확인 -->
+		select SEAT_NUM,
+			   STATUS
+		from   READINGROOM
+		where SEAT_NUM =  #{selectSeat}
+	</select>
+	
+	<update id="updateSeat" parameterType="read">									<!-- 좌석 사용 변경 -->
+		update READINGROOM
+		set STATUS = '2'
+		where SEAT_NUM = #{selectSeat}
+	</update>
+	
+	<insert id="insertUsing" parameterType="read">							<!-- 좌석 로그 입력 -->	 
+		{call P_TIME_CK(#{loginId, mode=IN, jdbcType=VARCHAR, javaType=string},
+						'inserting',
+						#{selectSeat, mode=IN, jdbcType=VARCHAR, javaType=string},
+						#{starttime, mode=IN, jdbcType=VARCHAR, javaType=string})
+	</insert>
+	
+	<insert id="timecheck" statementType="CALLABLE">      <!-- 프로시저는 insert,update, delete 사용 가능 -->
+      {call P_readingroom_timeck(#{value,mode=IN, jdbcType=VARCHAR, javaType=string})   
+   </insert>
+	
+	<select id="seat_useing" parameterType="string" resultType="string">		<!-- 본인 좌석 확인 -->
+		select SEAT_NUM
+		from READINGROOM_HISTORY
+		where to_char(end_time,'yyyymmdd') = to_char(sysdate,'yyyymmdd')
+		and MEMBER_ID = #{loginId}
+		AND to_char(end_time,'YYYY/MM/DD HH24:MI:SS') > #{starttime}
+	</select>
+	
+	<select id="usetimer" resultType="string" parameterType="string">				<!-- 남은 시간 (시,분,초) -->
+		select END_TIME
+		from READINGROOM_HISTORY
+		where to_char(end_time,'yyyymmdd') = to_char(sysdate,'yyyymmdd')
+		and MEMBER_ID =  #{loginId}
+		AND to_char(end_time,'YYYY/MM/DD HH24:MI:SS') > #{starttime}
+	</select>
+	
+	
+	<insert id="return_seat" statementType="CALLABLE"  parameterType="read">
+		{call P_return_seat(#{loginId, mode=IN, jdbcType=VARCHAR, javaType=string},
+							#{selectSeat, mode=IN, jdbcType=VARCHAR, javaType=string})
+	</insert>
+	
+	<select id="remaining" resultType="string">
+		select EXTRACT(HOUR from end_time - to_timestamp(#{starttime},'yyyy/mm/dd hh24:mi:ss'))*60 + EXTRACT(MINUTE from end_time - to_timestamp(#{starttime},'yyyy/mm/dd hh24:mi:ss'))
+		from   readingroom_history
+		where  member_id = #{loginId}
+		AND to_char(end_time,'YYYY/MM/DD HH24:MI:SS') > #{starttime}
+	</select>
+	
+	<update id="extension">
+		 {call P_TIME_CK(#{loginId, mode=IN, jdbcType=VARCHAR, javaType=string},
+						'update',
+						#{selectSeat, mode=IN, jdbcType=VARCHAR, javaType=string},
+						#{starttime, mode=IN, jdbcType=VARCHAR, javaType=string})
+	</update>
+	
+
+	<select id="Roomshow" resultType="read">
+	 select SEAT_NUM,
+		to_number(SUBSTR(seat_num,2,2)) as "row",
+		to_number(SUBSTR(seat_num,4,2)) as "col",
+		STATUS,
+    	(select to_number(max(SUBSTR(seat_num,2,2))) as "row" from readingroom where seat_num like #{room} || '%') rmax,
+    	(select to_number(max(SUBSTR(seat_num,4,2))) as "col" from readingroom where seat_num like #{room} || '%') cmax  
+		from READINGROOM
+		where SEAT_NUM like #{room} || '%'
+	</select>
+	
+	<insert id="settingroom" statementType="CALLABLE"  parameterType="read">
+		{call P_readingroom_setting(#{room, mode=IN, jdbcType=VARCHAR, javaType=string},
+						    #{row, mode=IN, jdbcType=VARCHAR, javaType=string},
+						    #{col, mode=IN, jdbcType=VARCHAR, javaType=string})
+						    
+	</insert>
+	
+	
+	<update id="setting_change_ck" statementType="CALLABLE"  parameterType="read">
+		 {call P_change_setting_ck(#{room, mode=IN, jdbcType=VARCHAR, javaType=string},
+						#{ck, mode=OUT, jdbcType=VARCHAR, javaType=string},
+						#{starttime, mode=IN, jdbcType=VARCHAR, javaType=string})
+	</update>
+	 
+	
+ 
+</mapper>

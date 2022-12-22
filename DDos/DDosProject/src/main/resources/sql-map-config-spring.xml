@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+ PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="mapUnderscoreToCamelCase" value="true" />
+	</settings>
+		
+	<!-- Alias 설정 -->
+	<typeAliases>
+		<typeAlias alias="user" type="com.ddos.web.user.UserVO" />	
+		<typeAlias alias="read" type="com.ddos.web.read.ReadVO" />
+		<typeAlias alias="book" type="com.ddos.web.book.BookVO" />
+		<typeAlias alias="notice" type="com.ddos.web.notice.NoticeVO" />
+		<typeAlias alias="userread" type="com.ddos.web.read.UserReadVO"/>
+		<typeAlias alias="study" type="com.ddos.web.study.StudyVO"/>
+		<typeAlias alias="suggestion" type="com.ddos.web.suggestion.SuggestionVO"/>
+		<typeAlias alias="studymember" type="com.ddos.web.study.StudyMemberVO"/>		  
+		<typeAlias alias="rental" type="com.ddos.web.rental.RentalVO"/>	
+		<typeAlias alias="review" type="com.ddos.web.book.ReviewVO"/>
+		<typeAlias alias="event" type="com.ddos.web.event.EventVO"/>
+		<typeAlias alias="wishbook" type="com.ddos.web.book.WishBookVO"/>
+		<typeAlias alias="rental" type="com.ddos.web.rental.RentalVO"/>
+		<typeAlias alias="message" type="com.ddos.web.message.MessageVO"/>
+		<typeAlias alias="assets" type="com.ddos.web.assets.AssetsVO"/>
+	</typeAliases>
+	
+</configuration>

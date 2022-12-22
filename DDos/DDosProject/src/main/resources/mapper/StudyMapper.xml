@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="study">
+<!-- <resultMap type="study" id="studyResult">
+	<id property="study" column="seq"/>
+	<result property="title" column="TITLE"/>
+	<result property="writer" column="WRITER"/>
+	<result property="content" column="CONTENT"/>
+	<result property="regdate" column="REGDATE"/>
+	<result property="cnt" column="CNT"/>
+	
+</resultMap> -->
+	<!-- 스터디 -->
+	<insert id="insertStudy" parameterType="study">
+	INSERT INTO STUDY(
+	STUDY_NUM,
+	STUDY_NAME,
+	STUDY_SUBJECT,
+	STUDY_TIME,
+	STUDY_DATE,
+	RECRUIT_END,
+	RECRUIT_PERSON,
+	STATUS,
+	STUDYROOM_NUM,
+	MEMBER_ID)
+	
+	VALUES(
+		STUDY_SEQ.NEXTVAL,
+		#{studyName},
+		#{studySubject},
+		#{studyTime},
+		to_date(#{studyDate},'yyyy-mm-dd'),
+		to_date(#{recruitEnd},'yyyy-mm-dd'),
+		#{recruitPerson},
+		#{status},
+		#{studyroomNumber},
+		#{memberId}
+		)
+	</insert>
+	
+	<!-- 스터디멤버 -->
+	 <insert id="insertStudyMember" parameterType="studymember">
+	INSERT INTO STUDY_MEMBER(
+	STUDY_NUM,
+	MEMBER_ID)
+	
+	VALUES(
+		#{studyNumber},
+		#{memberId}
+	)
+	</insert>
+	
+	
+	<!-- 단건조회 -->
+	<select id="getStudy" parameterType="study" resultType="study">
+		SELECT 
+		
+		STUDY_NUM as studyNumber,
+		STUDY_NAME,
+		STUDY_SUBJECT,
+		STUDY_TIME,
+		TO_CHAR(STUDY_DATE,'YYYY-MM-DD') AS STUDY_DATE,
+		TO_CHAR(RECRUIT_END,'YYYY-MM-DD') AS RECRUIT_END,
+		RECRUIT_PERSON,
+		STATUS,
+		STUDYROOM_NUM as studyroomNumber,
+		MEMBER_ID
+		
+		FROM STUDY
+		WHERE STUDY_NUM=#{studyNumber}
+	</select> 
+	
+	<!-- 조회 -->
+	<select id="checkStudy" parameterType="study" resultType="study">
+		SELECT 
+		
+		STUDY_NUM as studyNumber,
+		STUDY_NAME,
+		STUDY_SUBJECT,
+		STUDY_TIME,
+		TO_CHAR(STUDY_DATE,'YYYY-MM-DD') AS STUDY_DATE,
+		TO_CHAR(RECRUIT_END,'YYYY-MM-DD') AS RECRUIT_END,
+		RECRUIT_PERSON,
+		STATUS,
+		STUDYROOM_NUM as studyroomNumber,
+		MEMBER_ID
+		
+		FROM STUDY
+		WHERE STUDY_DATE=#{studyDate}
+		AND STUDY_TIME=#{studyTime}
+		AND STUDYROOM_NUM=#{studyroomNumber}
+	</select> 
+	
+	
+	<delete id="deleteStudy" parameterType="study">
+	DELETE FROM STUDY WHERE STUDY_NUM= #{studyNumber}
+	</delete>
+	<delete id="deleteStudyMember" parameterType="studymember">
+	DELETE FROM STUDY_MEMBER WHERE STUDY_NUM= #{studyNumber}
+	</delete>
+	
+	<!-- 단건조회 -->
+	<select id="getAdminStudyList" parameterType="study" resultType="study">
+		SELECT S.STUDY_NUM studyNumber, STUDY_NAME, STUDY_DATE, RECRUIT_END, STUDY_TIME, RECRUIT_PERSON, COUNT(SM.MEMBER_ID) personStatus
+		FROM STUDY S LEFT OUTER JOIN STUDY_MEMBER SM
+		ON S.STUDY_NUM = SM.STUDY_NUM
+		GROUP BY S.STUDY_NUM, STUDY_DATE, RECRUIT_END, STUDY_TIME, RECRUIT_PERSON, STUDY_NAME
+		ORDER BY RECRUIT_END
+	</select> 
+	
+</mapper> 

@@ -1,0 +1,218 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="user">
+
+	<select id="getUser" parameterType="user" resultType="user">
+		SELECT ID, PASSWORD, NAME, PHONE, BIRTH, to_char(EXP_DATE,'yyyy-mm-dd') EXP_DATE,MEM_SEPARATION, OUT_COUNT, ADDRESS, GENDER,
+		(SELECT COUNT(*) FROM RENTAL WHERE MEMBER_ID = MEMBER.ID) rentalCount,
+		(SELECT COUNT(*) FROM READINGROOM_HISTORY WHERE MEMBER_ID = MEMBER.ID) readCount,
+		(SELECT COUNT(*) FROM REVIEW WHERE MEMBER_ID = MEMBER.ID) reviewCount
+		FROM MEMBER
+		WHERE ID = #{id}
+	</select>
+	
+	<select id="getUserList" resultType="user">
+
+		SELECT ID, PASSWORD, NAME, PHONE, BIRTH, to_char(EXP_DATE,'yyyy-mm-dd'),MEM_SEPARATION, OUT_COUNT, ADDRESS, GENDER,
+		(SELECT COUNT(*) FROM RENTAL WHERE MEMBER_ID = MEMBER.ID) rentalCount,
+		(SELECT COUNT(*) FROM READINGROOM_HISTORY WHERE MEMBER_ID = MEMBER.ID) readCount,
+		(SELECT COUNT(*) FROM REVIEW WHERE MEMBER_ID = MEMBER.ID) reviewCount
+		FROM MEMBER
+		
+		<where>
+			<if test="id == 'admin@gmail.com'">
+				AND MEM_SEPARATION != 'admin'
+			</if>
+			<if test="searchType != null and searchType == 'id'">
+				MEM_SEPARATION != 'admin'
+				AND ID LIKE '%' || #{searchUserKeyword} || '%' </if>
+			<if test="searchType != null and searchType == 'name'">
+				MEM_SEPARATION != 'admin'
+				AND NAME LIKE '%' || #{searchUserKeyword} || '%' </if>
+		</where>
+		
+		<choose>
+        	<when test="sortCol != null and sortCol !=''" >
+         		<if test="sortCol == 'EXP_DATE'">
+         			ORDER BY ${sortCol} ASC
+         		</if>
+         		<if test="sortCol != 'EXP_DATE'">
+         			ORDER BY ${sortCol} DESC
+         		</if>
+        	</when>
+      	</choose>
+		
+	</select>
+	
+	<select id="getNUserList" resultType="user">
+
+		SELECT ID, PASSWORD, NAME, PHONE, BIRTH, to_char(EXP_DATE,'yyyy-mm-dd'),MEM_SEPARATION, OUT_COUNT, ADDRESS, GENDER,
+		(SELECT COUNT(*) FROM RENTAL WHERE MEMBER_ID = MEMBER.ID) rentalCount,
+		(SELECT COUNT(*) FROM READINGROOM_HISTORY WHERE MEMBER_ID = MEMBER.ID) readCount,
+		(SELECT COUNT(*) FROM REVIEW WHERE MEMBER_ID = MEMBER.ID) reviewCount
+		FROM MEMBER
+		
+		<where>
+			<if test="memSeparation != null">
+				AND MEM_SEPARATION = #{memSeparation}
+			</if>
+			<if test="searchType != null and searchType == 'id'">
+				MEM_SEPARATION = 'user'
+				AND ID LIKE '%' || #{searchUserKeyword} || '%' 
+			</if>
+			<if test="searchType != null and searchType == 'name'">
+				MEM_SEPARATION = 'user'
+				AND NAME LIKE '%' || #{searchUserKeyword} || '%' 
+			</if>
+		</where>
+		
+		<choose>
+        	<when test="sortCol != null and sortCol !=''" >
+        		WHERE MEM_SEPARATION = 'user'
+         		<if test="sortCol == 'EXP_DATE'">
+         			ORDER BY ${sortCol} ASC
+         		</if>
+         		<if test="sortCol != 'EXP_DATE'">
+         			ORDER BY ${sortCol} DESC
+         		</if>
+        	</when>
+      	</choose>
+		
+	</select>
+	
+	<select id="getIUserList" resultType="user">
+
+		SELECT ID, PASSWORD, NAME, PHONE, BIRTH, to_char(EXP_DATE,'yyyy-mm-dd'),MEM_SEPARATION, OUT_COUNT, ADDRESS, GENDER,
+		(SELECT COUNT(*) FROM RENTAL WHERE MEMBER_ID = MEMBER.ID) rentalCount,
+		(SELECT COUNT(*) FROM READINGROOM_HISTORY WHERE MEMBER_ID = MEMBER.ID) readCount,
+		(SELECT COUNT(*) FROM REVIEW WHERE MEMBER_ID = MEMBER.ID) reviewCount
+		FROM MEMBER
+		
+		<where>
+			<if test="memSeparation != null">
+				AND MEM_SEPARATION = #{memSeparation}
+			</if>
+			<if test="searchType != null and searchType == 'id'">
+				MEM_SEPARATION = 'iuser'
+				AND ID LIKE '%' || #{searchUserKeyword} || '%' 
+			</if>
+			<if test="searchType != null and searchType == 'name'">
+				MEM_SEPARATION = 'iuser'
+				AND NAME LIKE '%' || #{searchUserKeyword} || '%' 
+			</if>
+		</where>
+		
+		<choose>
+        	<when test="sortCol != null and sortCol !=''" >
+        	WHERE MEM_SEPARATION = 'iuser'
+         		<if test="sortCol == 'EXP_DATE'">
+         			ORDER BY ${sortCol} ASC
+         		</if>
+         		<if test="sortCol != 'EXP_DATE'">
+         			ORDER BY ${sortCol} DESC
+         		</if>
+        	</when>
+      	</choose>
+		
+	</select>
+	
+	<select id="getBUserList" resultType="user">
+
+		SELECT ID, PASSWORD, NAME, PHONE, BIRTH, to_char(EXP_DATE,'yyyy-mm-dd'),MEM_SEPARATION, OUT_COUNT, ADDRESS, GENDER,
+		(SELECT COUNT(*) FROM RENTAL WHERE MEMBER_ID = MEMBER.ID) rentalCount,
+		(SELECT COUNT(*) FROM READINGROOM_HISTORY WHERE MEMBER_ID = MEMBER.ID) readCount,
+		(SELECT COUNT(*) FROM REVIEW WHERE MEMBER_ID = MEMBER.ID) reviewCount
+		FROM MEMBER
+		
+		<where>
+			<if test="memSeparation != null">
+				AND MEM_SEPARATION = #{memSeparation}
+			</if>
+			<if test="searchType != null and searchType == 'id'">
+				MEM_SEPARATION = 'buser'
+				AND ID LIKE '%' || #{searchUserKeyword} || '%' 
+			</if>
+			<if test="searchType != null and searchType == 'name'">
+				MEM_SEPARATION = 'buser'
+				AND NAME LIKE '%' || #{searchUserKeyword} || '%' 
+			</if>
+		</where>
+		
+		<choose>
+        	<when test="sortCol != null and sortCol !=''" >
+        	WHERE MEM_SEPARATION = 'buser'
+         		<if test="sortCol == 'EXP_DATE'">
+         			ORDER BY ${sortCol} ASC
+         		</if>
+         		<if test="sortCol != 'EXP_DATE'">
+         			ORDER BY ${sortCol} DESC
+         		</if>
+        	</when>
+      	</choose>
+		
+	</select>
+	
+	<insert id="insertUser" parameterType="user">
+	
+		INSERT INTO MEMBER(ID, PASSWORD, NAME, PHONE, BIRTH, EXP_DATE, MEM_SEPARATION, OUT_COUNT, ADDRESS, GENDER) 
+		VALUES( #{id}, #{password}, #{name}, #{phone}, #{birth}, null,'user',0, #{address}, #{gender})
+	
+	</insert>
+	
+	<select id="checkId" parameterType="user" resultType="int">
+	
+		SELECT COUNT(*)
+    	FROM MEMBER WHERE ID=#{id}
+    	
+	</select>
+	
+	<select id="findId" parameterType="user" resultType="user">
+	
+		SELECT ID
+		FROM MEMBER
+		WHERE NAME = #{name}
+		AND PHONE = #{phone}
+	
+	</select>
+	
+	<select id="findPwd" parameterType="user" resultType="user">
+	
+		SELECT PASSWORD
+		FROM MEMBER
+		WHERE ID = #{id}
+		
+	
+	</select>
+	
+	
+	<update id="updateUser" parameterType="user">
+      	
+		UPDATE MEMBER
+		<trim prefix="SET" suffixOverrides=",">
+			<if test="password != null">PASSWORD = #{password},</if>
+			<if test="name != null">NAME = #{name},</if>
+			<if test="phone != null">PHONE = #{phone},</if>
+			<if test="birth != null">BIRTH = #{birth},</if>
+			<if test="address != null">ADDRESS = #{address},</if>
+			<if test="memSeparation != null">MEM_SEPARATION = #{memSeparation},</if>
+			<if test="outCount != null">OUT_COUNT = #{outCount},</if>
+		</trim>
+			
+		WHERE ID = 	#{id}
+	
+	</update>
+	
+	<delete id="deleteUser" parameterType="user">
+		DELETE FROM MEMBER
+		WHERE ID = #{id}
+	</delete>
+	
+	<update id="extensionUser" parameterType="user">
+		update member
+		set exp_date = sysdate + 365
+		where id = #{id}
+	</update>
+	
+
+</mapper> 

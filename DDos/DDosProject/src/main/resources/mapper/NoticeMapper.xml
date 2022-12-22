@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="notice">
+
+	<!-- 전체 조회 -->
+	<select id="getNoticeList" resultType="notice" 	parameterType="notice">
+	SELECT B.* FROM (SELECT A.*, ROWNUM RN FROM (
+	SELECT NOTICE_NUM,
+	NOTICE_TITLE, TO_CHAR(TO_DATE(NOTICE_DATE, 'YY/MM/DD'), 'YY/MM/DD') NOTICE_DATE, NOTICE_CONT, MEMBER_ID, NOTICE_CNT
+	FROM
+	NOTICE
+	<where>
+		<if test="searchType != null and searchType == 'noticeTitle'">
+			and NOTICE_TITLE like '%' || #{searchKeyword} || '%' </if>
+		<if test="searchType != null and searchType == 'noticeCont'">
+			and NOTICE_CONT like '%' || #{searchKeyword} || '%' </if>
+	</where>
+	ORDER BY NOTICE_NUM DESC
+	) A) B WHERE RN BETWEEN #{first} and #{last}
+</select>
+
+	<!-- 단건 조회 -->
+	<select id="getNotice" resultType="notice" parameterType="notice">
+		SELECT NOTICE_NUM,
+		NOTICE_TITLE,
+		NOTICE_CONT,
+		TO_CHAR(TO_DATE(NOTICE_DATE, 'YY/MM/DD'), 'YY/MM/DD') NOTICE_DATE,
+		NOTICE_CNT
+		FROM NOTICE
+		WHERE
+		NOTICE_NUM = #{noticeNum}
+	</select>
+
+	<!-- 조회수 증가 -->
+	<update id="increaseCnt">
+		UPDATE NOTICE SET
+		NOTICE_CNT = NOTICE_CNT+1
+		WHERE
+		NOTICE_NUM = #{noticeNum}
+	</update>
+
+	<!-- 등록 -->
+	<insert id="insertNotice" parameterType="notice">
+		<selectKey keyProperty="noticeNum" resultType="integer"
+			order="BEFORE">
+			SELECT MAX(NOTICE_NUM)+1 FROM NOTICE
+		</selectKey>
+		INSERT INTO NOTICE (
+		NOTICE_NUM,
+
+		NOTICE_TITLE,
+		NOTICE_CONT,
+		MEMBER_ID,
+		NOTICE_DATE,
+		NOTICE_CNT)
+		VALUES (
+		#{noticeNum},
+		#{noticeTitle},
+		#{noticeCont},
+		#{memberId},
+		sysdate,
+		0
+		)
+	</insert>
+
+	<!-- 수정 -->
+	<update id="updateNotice" parameterType="notice">
+		UPDATE NOTICE SET
+		NOTICE_TITLE = #{noticeTitle},
+		NOTICE_CONT = #{noticeCont},
+		NOTICE_DATE
+		= sysdate
+		WHERE NOTICE_NUM = #{noticeNum}
+	</update>
+
+	<!-- 삭제 -->
+	<delete id="deleteNotice" parameterType="notice">
+		DELETE NOTICE
+		WHERE
+		NOTICE_NUM = #{noticeNum}
+	</delete>
+
+	<!--건수 -->
+	<select id="getCount" resultType="int" parameterType="notice">
+		SELECT COUNT(*)
+		FROM NOTICE
+		<where>
+			<if test="searchType != null and searchType == 'noticeTitle'">
+				and NOTICE_TITLE like '%' || #{searchKeyword} || '%' </if>
+			<if test="searchType != null and searchType == 'noticeCont'">
+				and NOTICE_CONT like '%' || #{searchKeyword} || '%' </if>
+		</where>
+	</select>
+	
+</mapper> 

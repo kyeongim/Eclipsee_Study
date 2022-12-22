@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="event">
+
+	<select id="getEventDetail" parameterType="event" resultType="event">
+		
+		SELECT EVENT_NUM, EVENT_TITLE, EVENT_CONT, START_DATE, END_DATE, WRITE_DATE, EVENT_FILE
+		FROM EVENT
+
+		WHERE EVENT_NUM = #{eventNum}
+
+	</select>
+ 
+ 	<!-- 진행중인 이벤트 리스트 -->
+	<select id="getOngoingEvent" resultType="event">
+
+		SELECT EVENT_NUM, EVENT_TITLE, EVENT_CONT, START_DATE, END_DATE, WRITE_DATE, EVENT_FILE
+		FROM EVENT
+		
+		WHERE SYSDATE <![CDATA[ < ]]> END_DATE
+		AND SYSDATE <![CDATA[ > ]]> START_DATE
+
+	</select>
+	
+	<!-- 진행예정 이벤트 리스트 -->
+	<select id="getAheadEvent" resultType="event">
+
+		SELECT EVENT_NUM, EVENT_TITLE, EVENT_CONT, START_DATE, END_DATE, WRITE_DATE, EVENT_FILE
+		FROM EVENT
+		
+		WHERE SYSDATE <![CDATA[ < ]]> END_DATE
+		AND SYSDATE <![CDATA[ < ]]> START_DATE
+
+	</select>
+	
+	<!-- ================관리자용================== -->
+	<!-- 전체 조회 -->
+	<select id="getEventList" parameterType="event" resultType="event">
+		SELECT B.* FROM (SELECT A.*,  ROWNUM RN FROM (
+		SELECT * FROM EVENT
+		ORDER BY EVENT_NUM DESC
+		) A) B WHERE RN BETWEEN #{first} and #{last}
+	</select>
+	
+	<select id="getCount" resultType="int"  parameterType="event" >
+	SELECT COUNT(*)
+	FROM EVENT
+	</select>
+	
+	<!-- 단건 조회 -->
+	<select id="getEvent" resultType="event">
+		SELECT	EVENT_NUM, 
+			EVENT_TITLE,
+			EVENT_CONT,
+			START_DATE,
+			END_DATE,
+			WRITE_DATE
+		FROM EVENT
+		WHERE EVENT_NUM = #{eventNum}
+	</select>
+	
+	<!-- 등록 -->
+	<insert id="insertEvent" parameterType="event">
+		<selectKey keyProperty="eventNum" resultType="integer" order="BEFORE">
+			SELECT MAX(EVENT_NUM)+1 FROM EVENT
+		</selectKey>
+		INSERT INTO EVENT (
+			EVENT_NUM,
+			EVENT_TITLE,
+			EVENT_CONT, 
+			START_DATE,
+			END_DATE,
+			WRITE_DATE,
+			MEMBER_ID
+			<if test="eventFile != null and eventFile != ''">
+			,EVENT_FILE
+			</if>
+			)
+		VALUES (
+			#{eventNum},
+			#{eventTitle},
+			#{eventCont},
+			#{startDate},
+			#{endDate},
+			sysdate,
+			#{memberId}
+			<if test="eventFile != null and eventFile != ''">
+			,#{eventFile}
+			</if>
+			)
+	</insert>
+	
+	<!-- 수정 -->
+	<update id="updateEvent" parameterType="event">
+		UPDATE EVENT SET
+			EVENT_TITLE = #{eventTitle},
+			EVENT_CONT = #{eventCont},
+			START_DATE = #{startDate},
+			END_DATE = #{endDate},
+			WRITE_DATE = sysdate
+		WHERE EVENT_NUM = #{eventNum}
+	</update>
+	
+	<!-- 삭제 -->
+	<delete id="deleteEvent" parameterType="event">
+		DELETE EVENT
+		WHERE EVENT_NUM = #{eventNum}
+	</delete>
+</mapper>
+	
+	

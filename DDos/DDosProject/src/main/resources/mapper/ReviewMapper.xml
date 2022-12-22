@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+ "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="review">
+	<!-- 리뷰 단건 조회 -->
+	<select id="getReview" resultType="review">
+		SELECT
+			ISBN,
+			REVIEW_NUM,
+			REVIEW_TITLE,
+			REVIEW_CONT,
+			TO_CHAR(TO_DATE(REVIEW_DATE, 'YY/MM/DD'), 'YY/MM/DD') REVIEW_DATE
+		FROM REVIEW
+		WHERE REVIEW_NUM = #{reviewNum} AND ISBN = #{isbn}
+	</select>	
+	
+	<!-- 리뷰 조회 -->
+	<select id="getReviewList" resultType="review"
+		parameterType="review">
+		<!-- SELECT REVIEW_TITLE, MEMBER_ID FROM REVIEW WHERE ISBN = #{isbn} -->
+
+		SELECT	REVIEW.ISBN, REVIEW.REVIEW_TITLE, REVIEW.REVIEW_CONT,
+				REVIEW.REVIEW_POINT, REVIEW.MEMBER_ID, REVIEW.REVIEW_NUM, TO_CHAR(TO_DATE(REVIEW_DATE, 'YY/MM/DD'), 'YY/MM/DD') REVIEW_DATE, BOOK.ISBN, BOOK.BOOK_TITLE
+		FROM	BOOK JOIN REVIEW
+		ON		BOOK.ISBN = REVIEW.ISBN
+		WHERE 	REVIEW.ISBN=#{isbn}
+		ORDER BY REVIEW_DATE DESC
+
+		<!-- <![CDATA[ WHERE RN <= #{pageUnit} ]]> -->
+	</select>
+
+	<!-- 리뷰 등록 -->
+	<insert id="insertReview" parameterType="review">
+		<selectKey keyProperty="reviewNum" resultType="string"	order="BEFORE">
+			SELECT NVL(MAX(REVIEW_NUM), 0) + 1 FROM REVIEW
+		</selectKey>
+		INSERT INTO REVIEW (ISBN, REVIEW_TITLE, REVIEW_CONT, REVIEW_POINT,
+				MEMBER_ID, REVIEW_NUM, REVIEW_DATE)
+		VALUES (${isbn}, #{reviewTitle}, #{reviewCont}, #{reviewPoint}, #{memberId},
+				#{reviewNum}, sysdate)
+	</insert>
+
+	<!-- 리뷰 수정 -->
+	<update id="updateReview" parameterType="review">
+		UPDATE 	REVIEW SET
+				REVIEW_TITLE=#{reviewTitle},
+				REVIEW_CONT=#{reviewCont},
+				REVIEW_POINT=#{reviewPoint},
+				REVIEW_DATE = sysdate
+		WHERE 	<!-- REVIEW.ISBN=${isbn} AND --> REVIEW_NUM=#{reviewNum}
+	</update>
+
+	<!-- 삭제 -->
+	<delete id="deleteReview" parameterType="review">
+		DELETE REVIEW WHERE REVIEW_NUM = #{reviewNum}
+	</delete>
+</mapper>
